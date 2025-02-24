@@ -19,8 +19,8 @@ impl<'a> TryFrom<&'a str> for Entry<'a> {
     fn try_from(value: &'a str) -> Result<Self, Self::Error> {
         let (key, val) = value.split_once('=').ok_or(ParseError::NoEqualsSign)?;
 
-        if key.is_empty() { return Err(ParseError::EmptyKey)?; }
-        if val.is_empty() { return Err(ParseError::EmptyVal)?; }
+        if key.is_empty() { Err(ParseError::EmptyKey)? }
+        if val.is_empty() { Err(ParseError::EmptyVal)? }
 
         Ok(Entry {
             key,
