@@ -11,6 +11,13 @@
         pkgs = import nixpkgs { inherit system overlays; };
     in
     {
+      packages.default = pkgs.rustPlatform.buildRustPackage {
+        pname = "envide";
+        version = "0.1.0";
+        src = ./.;
+        cargoLock.lockFile = ./Cargo.lock;
+      };
+
       devShells.default = with pkgs; mkShell {
         buildInputs = [
           just
