@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs::{self, OpenOptions}, io::{self, Write}};
 
 use envide::env::entry::Entry;
 
@@ -9,33 +9,37 @@ use clap::Parser;
 struct Args {
     #[arg(short, long, default_value = ".env")]
     path: String,
+    
+    #[clap(short, long, value_names = [ "KEY", "NEW_VAL" ])]
+    replace: Option<Vec<String>>,
 }
 
-pub fn get_value<'a>(key: &str, entries: &'a Vec<Entry>) -> Option<&'a str> {
-    for entry in entries {
-        if entry.key == key {
-            return Some(&entry.val)
-        }
-    }
-
-    None
-}
-
-fn main() {
+fn main() -> io::Result<()> {
     let args = Args::parse();
 
-    if let Ok(contents) = fs::read_to_string(args.path) {
-        let entries: Vec<Entry> = contents
+    if let Some(replace) = args.replace {
+        let key = &replace[0];
+        let new = &replace[1];
+
+        let content: String = fs::read_to_string(&args.path)?
             .lines()
-            .filter_map(|line| line.try_into().ok())
+            .map(|line| {
+                if let Ok(mut entry) = Entry::try_from(line) {
+                    if entry.key == key { entry.val = new; }
+                    format!("{}\n", entry)
+                } else {
+                    line.to_string()
+                }
+            })
             .collect();
 
-        for entry in &entries {
-            println!("{}", entry);
-        }
+        let mut file = OpenOptions::new()
+            .write(true)
+            .truncate(true)
+            .open(&args.path)?;
 
-        if let Some(val) = get_value("JEFF", &entries) {
-            println!("{}", val);
-        }
+        file.write_all(content.as_bytes())?;
     }
+
+    Ok(())
 }
