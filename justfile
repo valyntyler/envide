@@ -1,2 +1,4 @@
-run:
-  @ cargo run
+@_default: run
+
+@run:
+  cargo run
