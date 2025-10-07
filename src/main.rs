@@ -1,4 +1,7 @@
-use std::{fs::{self, OpenOptions}, io::{self, Write}};
+use std::{
+    fs::{self, OpenOptions},
+    io::{self, Write},
+};
 
 use envide::env::entry::Entry;
 
@@ -10,11 +13,12 @@ struct Args {
     #[arg(short, long, default_value = ".env")]
     path: String,
 
-    #[arg(short, long, default_value_t = false)] new: bool,
+    #[arg(short, long, default_value_t = false)]
+    new: bool,
 
     #[arg(short = 'x', long, default_value_t = false)]
     exclusive: bool,
-    
+
     #[arg(short, long, default_value_t = false)]
     replace: bool,
 
@@ -38,7 +42,7 @@ fn main() -> io::Result<()> {
                 Ok(entry) => match entry.key == key {
                     true => false,
                     false => true,
-                }
+                },
             })
             .map(|line| format!("{}\n", line))
             .collect()
@@ -49,7 +53,9 @@ fn main() -> io::Result<()> {
         if args.exclusive {
             content.lines().for_each(|line| {
                 if let Ok(entry) = Entry::try_from(line) {
-                    if entry.key == key { ok = false; }
+                    if entry.key == key {
+                        ok = false;
+                    }
                 }
             });
         }
